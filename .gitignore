@@ -1,0 +1,14 @@
+# common folders you create for runs
+playwright-report/
+test-results/
+artifacts/
+downloads/
+screenshots/
+videos/
+traces/
+# common files from reports
+report.html
+pytest.ini
+
+#credentials file
+.env
