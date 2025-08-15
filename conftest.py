@@ -40,7 +40,9 @@ def _artifacts_on_failure(page, request):
 @pytest.fixture()
 def logged_in(page:Page):
     loginpage=LoginPage(page)
-    loginpage.goto(os.getenv("base_url"))
+    loginpage.goto(os.getenv("base_url") or os.getenv("E2E_BASE_URL"))
 
-    loginpage.loginaction(os.getenv("e_username"),os.getenv("e_password"))
+    loginpage.loginaction((os.getenv("e_username") or os.getenv("E2E_USERNAME")
+),(os.getenv("e_password"))or os.getenv("E2E_PASSWORD")
+)
     return page
