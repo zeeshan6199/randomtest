@@ -4,12 +4,10 @@ on: [push, pull_request]
 jobs:
   tests:
     runs-on: ubuntu-latest
-
-    # TEMPORARY: hardcoded env values for a quick run
     env:
-      E2E_BASE_URL: https://www.saucedemo.com/
-      E2E_USERNAME: standard_user
-      E2E_PASSWORD: secret_sauce
+      base_url: https://www.saucedemo.com/
+      e_username: standard_user
+      e_password: secret_sauce
 
     steps:
       - uses: actions/checkout@v4
@@ -21,28 +19,23 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt || pip install pytest pytest-playwright python-dotenv
+          pip install -r requirements.txt || pip install pytest pytest-playwright pytest-html
           python -m playwright install --with-deps
 
-      # TEMPORARY: create a .env so load_dotenv() also picks it up
-      - name: Create .env (temporary)
+      - name: Run tests (generate reports)
         run: |
-          cat > .env <<EOF
-          E2E_BASE_URL=${E2E_BASE_URL}
-          E2E_USERNAME=${E2E_USERNAME}
-          E2E_PASSWORD=${E2E_PASSWORD}
-          EOF
+          pytest \
+            --html=report.html --self-contained-html \
+            --junitxml=pytest-junit.xml \
+            --screenshot=only-on-failure --video=retain-on-failure --tracing=retain-on-failure
 
-      - name: Sanity check env presence (masked)
-        run: |
-          for v in E2E_BASE_URL E2E_USERNAME E2E_PASSWORD; do
-            if [ -z "${!v}" ]; then
-              echo "::error title=Missing env::Environment variable $v is not set"
-              exit 1
-            else
-              echo "$v is set (length: ${#v})"
-            fi
-          done
-
-      - name: Run tests
-        run: pytest --screenshot=only-on-failure --video=retain-on-failure --tracing=on
+      - name: Upload artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            report.html
+            pytest-junit.xml
+            artifacts/**     # your failure screenshots/html if any
+          if-no-files-found: warn
