@@ -1,7 +1,8 @@
-import pytest,os,datetime,pathlib
+import pytest,os,pathlib
 from playwright.sync_api import Page
 from pages.loginpage import LoginPage
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
